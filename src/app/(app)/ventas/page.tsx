@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { dayStart } from "@/lib/dates";
 import { SaleForm } from "@/components/forms/sale-form";
+import { Glosario, type GlosarioItem } from "@/components/glosario";
 import { deleteSale } from "@/lib/actions/sales";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,47 @@ interface SearchParams {
   channel?: string;
   code?: string;
 }
+
+// Definiciones de las casillas del registro de ventas. Ajusta las que no
+// coincidan con vuestras reglas.
+const VENTAS_GLOSARIO: GlosarioItem[] = [
+  {
+    term: "Fecha de venta",
+    def: "El día en que se cierra/cobra la venta. Es la fecha que cuenta para los totales del mes.",
+  },
+  {
+    term: "Producto",
+    def: "El programa vendido: Youth, Talent, Executive, Legacy o FunSex.",
+  },
+  {
+    term: "Importe (€)",
+    def: "Lo que factura la venta en euros. Si es a cuotas o suscripción, el importe total de la operación.",
+  },
+  {
+    term: "Forma de pago",
+    def: "Pago único, en cuotas o suscripción recurrente.",
+  },
+  {
+    term: "Canal de entrada",
+    def: "Por dónde entró ese cliente al embudo (test de filosofía, dosier, campaña de pago, orgánico…). Es el origen, no los pasos intermedios.",
+  },
+  {
+    term: "Entrada del lead",
+    def: "El día en que ese cliente entró como lead. Con esta fecha y la de venta se calculan solos los días que tardó en cerrar.",
+  },
+  {
+    term: "Código de descuento",
+    def: "El código usado en la compra, si lo hubo. Sirve para ver qué campañas/códigos convierten.",
+  },
+  {
+    term: "Atribuciones",
+    def: "A quién o a qué se le apunta la venta (Josep, canal de pago, código). Pueden marcarse varias a la vez y NO suman al total del equipo: solo sirven para ver quién empuja.",
+  },
+  {
+    term: "Touchpoints presentes",
+    def: "Los puntos de contacto por los que pasó esta venta (dosier, clase muestra, miniviaje, llamada…). Marca todos los que aplique para ver cuáles convierten más.",
+  },
+];
 
 export default async function VentasPage({
   searchParams,
@@ -80,7 +122,10 @@ export default async function VentasPage({
         </p>
       </div>
 
-      <SaleForm todayISO={todayISO} />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <SaleForm todayISO={todayISO} />
+        <Glosario className="h-fit xl:sticky xl:top-20" items={VENTAS_GLOSARIO} />
+      </div>
 
       {/* Filtros (GET) */}
       <Card>
