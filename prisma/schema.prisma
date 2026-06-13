@@ -1,0 +1,160 @@
+// Panel de KPIs de Ventas B2C — TheNomba
+//
+// Base de datos: PostgreSQL (Neon) en producción sobre Vercel.
+// La capa de acceso vive en src/lib y no usa features exclusivas de un motor,
+// así que el cambio desde el SQLite local fue solo de configuración.
+//
+// Los "enums" se guardan como String y se validan con tipos-unión de
+// TypeScript (ver src/types/domain.ts); los `touchpoints` como String con un
+// array JSON serializado. Se mantiene así (en vez de enums nativos de Postgres)
+// para no tocar queries ni añadir migraciones; funciona igual en ambos motores.
+
+generator client {
+  provider      = "prisma-client-js"
+  // "native" para desarrollo local; el target de Vercel (Amazon Linux) para producción.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  // En Vercel, la integración de Neon inyecta estas variables automáticamente:
+  //   DATABASE_URL          → conexión con pool (la usa la app en cada petición)
+  //   DATABASE_URL_UNPOOLED → conexión directa (la usan migraciones / db push)
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Usuarios y roles
+// ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String // ADMIN | INBOUND | AGENCY  (ver Role en domain.ts)
+  createdAt    DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Registro de Ventas — LA FUENTE DE VERDAD.
+//
+// El total real de ventas de compañía sale SOLO de contar/sumar estas
+// filas. Las atribuciones (attributedJosep, etc.) describen a quién se
+// le atribuye la venta y PUEDEN solaparse entre sí; NUNCA se suman para
+// obtener el total de compañía.
+// ─────────────────────────────────────────────────────────────────────
+
+model Sale {
+  id             String    @id @default(cuid())
+  saleDate       DateTime
+  customerName   String
+  product        String // Product: YOUTH | TALENT | EXECUTIVE | LEGACY | FUNSEX
+  amount         Decimal // importe en € (convertir a number en la capa de cálculo)
+  paymentType    String // PaymentType: UNICO | CUOTAS | SUSCRIPCION
+  discountCode   String?
+  entryChannel   String // EntryChannel (ver domain.ts)
+  leadEntryDate  DateTime?
+  daysLeadToSale Int? // calculado en servidor desde saleDate - leadEntryDate
+  attributedJosep Boolean  @default(false)
+  attributedCode  Boolean  @default(false)
+  attributedPaid  Boolean  @default(false)
+  touchpoints    String    @default("[]") // array JSON de Touchpoint serializado
+  createdAt      DateTime  @default(now())
+
+  @@index([saleDate])
+  @@index([product])
+  @@index([entryChannel])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Actividad diaria de Josep (rol INBOUND / captación entrante)
+// ─────────────────────────────────────────────────────────────────────
+
+model JosepDaily {
+  id                      String   @id @default(cuid())
+  date                    DateTime @unique // un único registro por día (upsert)
+  callContacts            Int      @default(0) // llamadas atendidas >60s
+  whatsappSlaMet          Boolean  @default(false) // entrante respondido <2h
+  whatsappProactive       Int      @default(0)
+  leadsWithoutNextAction  Int      @default(0)
+  touchpointsLogged       Boolean  @default(false)
+  attributedSales         Int      @default(0) // ventas ATRIBUIDAS (no suman al total)
+  failedPaymentsRecovered Int      @default(0)
+  notes                   String   @default("")
+  createdAt               DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Actividad diaria de Rodrigo (rol AGENCY / captación de agencia)
+// ─────────────────────────────────────────────────────────────────────
+
+model RodrigoDaily {
+  id                  String   @id @default(cuid())
+  date                DateTime @unique // un único registro por día (upsert)
+  newProspects        Int      @default(0)
+  prospectsIberoamerica Int    @default(0)
+  ambassadorsSigned   Int      @default(0)
+  verifiedPosts       Int      @default(0)
+  bitlyClicks         Int      @default(0)
+  agencyPieces        Int      @default(0)
+  networkContacted14d Boolean  @default(false)
+  attributableSales   Int      @default(0) // ventas ATRIBUIBLES (no suman al total)
+  tramo               String   @default("MIXTO") // Tramo: TOP | RESTO | MIXTO
+  notes               String   @default("")
+  createdAt           DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Informe semanal — GENERADO, no se carga a mano (salvo "Mi lectura").
+// Consolida los datos del rango lunes-viernes desde las tablas base.
+// ─────────────────────────────────────────────────────────────────────
+
+model WeeklyReport {
+  id                  String   @id @default(cuid())
+  weekStart           DateTime @unique
+  weekEnd             DateTime
+  companySalesReal    Int      @default(0) // contado SOLO desde Sale
+  monthRevenueAccrued Decimal  @default(0)
+  monthRevenueTarget  Decimal  @default(0)
+  gate50kPassed       Boolean  @default(false)
+  // Consolidado de Josep
+  josepContacts       Int      @default(0)
+  josepSlaPct         Float    @default(0)
+  josepAttributed     Int      @default(0)
+  // Consolidado de Rodrigo
+  rodrigoAttributable Int      @default(0)
+  rodrigoBitlyClicks  Int      @default(0)
+  rodrigoAmbassadors  Int      @default(0)
+  // Único campo manual:
+  pabloReading        String   @default("")
+  generatedAt         DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Objetivos por mes y ámbito (sembrados, no inventados)
+// ─────────────────────────────────────────────────────────────────────
+
+model Target {
+  id            String  @id @default(cuid())
+  month         String // "aaaa-mm"
+  scope         String // TargetScope: COMPANY | JOSEP | RODRIGO_TOP | RODRIGO_RESTO | FUNSEX
+  salesTarget   Int     @default(0)
+  revenueTarget Decimal @default(0)
+
+  @@unique([month, scope])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Lista de interesados de la preventa FunSex.
+// Snapshot acumulado por fecha; el panel compara el último total con los
+// hitos (≥800 a 30-jun, ≥1.600 a 31-jul, ≥2.400 a 31-ago de 2026).
+// ─────────────────────────────────────────────────────────────────────
+
+model FunsexInterest {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  total     Int      @default(0) // tamaño acumulado de la lista a esa fecha
+  createdAt DateTime @default(now())
+}
