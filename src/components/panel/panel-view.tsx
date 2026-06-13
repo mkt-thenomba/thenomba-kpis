@@ -5,6 +5,7 @@ import { SemaforoDot } from "@/components/kpi/semaforo";
 import { Badge } from "@/components/ui/badge";
 import { ChannelChart } from "@/components/charts/channel-chart";
 import { BarList } from "@/components/charts/bar-list";
+import { MoneyAccumulators } from "@/components/kpi/money-accumulators";
 import { eur, num, pct, fecha, mesLargo } from "@/lib/format";
 import {
   ENTRY_CHANNEL_LABELS,
@@ -83,6 +84,9 @@ export function PanelView({ data }: { data: PanelData }) {
             </p>
           </Card>
         </div>
+
+        {/* Facturación acumulada: semana / mes / año (toda desde Sale) */}
+        <MoneyAccumulators data={data.revenue} className="mt-4" />
 
         {/* Proyección de cierre */}
         <Card className="mt-4 p-5">

@@ -19,8 +19,11 @@ import { prisma } from "@/lib/db";
 import {
   monthKey,
   monthRangeFromKey,
+  monthRange,
   workWeekRange,
+  weekStart,
   weekdaysInRange,
+  endOfDay,
 } from "@/lib/dates";
 import {
   THRESHOLDS,
@@ -131,6 +134,39 @@ export async function getGate50k(month: string): Promise<Gate50k> {
     pct: Math.min(100, (revenue / threshold) * 100),
     semaforo: { estado: passed ? "ok" : "bad", sustained: false },
   };
+}
+
+// ── ACUMULADOS DE DINERO (semana / mes / año) — SOLO desde Sale ─────────────
+
+export interface RevenueAccumulators {
+  week: number; // facturación de la semana en curso (lunes → hoy)
+  month: number; // facturación del mes en curso
+  year: number; // facturación del año en curso
+}
+
+async function sumRevenue(gte: Date, lte: Date): Promise<number> {
+  const agg = await prisma.sale.aggregate({
+    _sum: { amount: true },
+    where: { saleDate: { gte, lte } },
+  });
+  return decToNum(agg._sum.amount);
+}
+
+/** Facturación acumulada de la semana, el mes y el año (toda desde Sale). */
+export async function getRevenueAccumulators(
+  today: Date
+): Promise<RevenueAccumulators> {
+  const monday = weekStart(today);
+  const { start: monthStart, end: monthEnd } = monthRange(today);
+  const yearStart = new Date(today.getFullYear(), 0, 1);
+  const yearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+
+  const [week, month, year] = await Promise.all([
+    sumRevenue(monday, endOfDay(today)),
+    sumRevenue(monthStart, monthEnd),
+    sumRevenue(yearStart, yearEnd),
+  ]);
+  return { week, month, year };
 }
 
 // ── PROYECCIÓN DE CIERRE DE MES (derivada de Sale) ──────────────────────────

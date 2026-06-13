@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import {
   getCompanyMonth,
   getGate50k,
+  getRevenueAccumulators,
   getMonthProjection,
   getJosepWeek,
   getJosepMonth,
@@ -27,6 +28,7 @@ export async function getPanelData(today: Date) {
   const [
     company,
     gate,
+    revenue,
     projection,
     josepWeek,
     josepMonth,
@@ -40,6 +42,7 @@ export async function getPanelData(today: Date) {
   ] = await Promise.all([
     getCompanyMonth(month),
     getGate50k(month),
+    getRevenueAccumulators(today),
     getMonthProjection(month, today),
     getJosepWeek(today),
     getJosepMonth(month),
@@ -59,6 +62,7 @@ export async function getPanelData(today: Date) {
     weekEnd,
     company,
     gate,
+    revenue,
     projection,
     josepWeek,
     josepMonth,

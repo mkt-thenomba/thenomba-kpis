@@ -6,6 +6,8 @@ import { prisma } from "@/lib/db";
 import { dayStart } from "@/lib/dates";
 import { SaleForm } from "@/components/forms/sale-form";
 import { Glosario, type GlosarioItem } from "@/components/glosario";
+import { MoneyAccumulators } from "@/components/kpi/money-accumulators";
+import { getRevenueAccumulators } from "@/lib/metrics";
 import { deleteSale } from "@/lib/actions/sales";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -105,11 +107,14 @@ export default async function VentasPage({
   if (searchParams.code)
     where.discountCode = { contains: searchParams.code };
 
-  const sales = await prisma.sale.findMany({
-    where,
-    orderBy: { saleDate: "desc" },
-    take: 200,
-  });
+  const [sales, revenue] = await Promise.all([
+    prisma.sale.findMany({
+      where,
+      orderBy: { saleDate: "desc" },
+      take: 200,
+    }),
+    getRevenueAccumulators(today),
+  ]);
 
   const totalImporte = sales.reduce((a, s) => a + Number(s.amount), 0);
 
@@ -121,6 +126,8 @@ export default async function VentasPage({
           La fuente de verdad. El total del equipo se cuenta solo desde aquí.
         </p>
       </div>
+
+      <MoneyAccumulators data={revenue} title="Facturación acumulada del equipo" />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <SaleForm todayISO={todayISO} />
