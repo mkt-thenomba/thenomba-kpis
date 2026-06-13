@@ -76,7 +76,7 @@ export default async function VentasPage({
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Registro de ventas</h1>
         <p className="text-muted-foreground">
-          La fuente de verdad. El total de compañía se cuenta solo desde aquí.
+          La fuente de verdad. El total del equipo se cuenta solo desde aquí.
         </p>
       </div>
 

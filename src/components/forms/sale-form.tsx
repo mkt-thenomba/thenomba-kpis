@@ -106,7 +106,7 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
             <legend className="text-sm font-medium">
               Atribuciones{" "}
               <span className="font-normal text-muted-foreground">
-                (pueden solaparse; no suman al total de compañía)
+                (pueden solaparse; no suman al total del equipo)
               </span>
             </legend>
             <div className="flex flex-wrap gap-4">

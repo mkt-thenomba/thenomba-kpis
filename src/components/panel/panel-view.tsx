@@ -46,10 +46,10 @@ export function PanelView({ data }: { data: PanelData }) {
     <div className="space-y-8">
       {/* ── CABECERA: COMPAÑÍA (fuente de verdad) ── */}
       <section>
-        <SectionTitle>Compañía · {mesLargo(data.month)}</SectionTitle>
+        <SectionTitle>Equipo Ventas B2C · {mesLargo(data.month)}</SectionTitle>
         <div className="grid gap-4 md:grid-cols-3">
           <KpiCard
-            title="Ventas reales de compañía"
+            title="Ventas reales del equipo"
             value={num(company.salesCount)}
             target={num(company.salesTarget)}
             progressPct={company.salesProgress.pct}
@@ -141,7 +141,7 @@ export function PanelView({ data }: { data: PanelData }) {
             value={num(josepMonth.attributedSales)}
             target={josepMonth.attributedTarget > 0 ? num(josepMonth.attributedTarget) : "—"}
             progressPct={josepMonth.attributedProgress.pct}
-            hint="No suman al total de compañía"
+            hint="No suman al total del equipo"
           />
           <KpiCard
             title="Conversión contacto→venta"
@@ -212,14 +212,14 @@ export function PanelView({ data }: { data: PanelData }) {
             value={num(rodrigoMonth.attributableByTramo.TOP)}
             target={rodrigoMonth.topTarget > 0 ? num(rodrigoMonth.topTarget) : "—"}
             progressPct={rodrigoMonth.topProgress.pct}
-            hint="No suman al total de compañía"
+            hint="No suman al total del equipo"
           />
           <KpiCard
             title="Atribuibles · Resto (mes)"
             value={num(rodrigoMonth.attributableByTramo.RESTO)}
             target={rodrigoMonth.restoTarget > 0 ? num(rodrigoMonth.restoTarget) : "—"}
             progressPct={rodrigoMonth.restoProgress.pct}
-            hint="No suman al total de compañía"
+            hint="No suman al total del equipo"
           />
           <KpiCard
             title="Clicks de Bitly (mes)"

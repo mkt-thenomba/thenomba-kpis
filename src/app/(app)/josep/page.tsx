@@ -77,7 +77,7 @@ export default async function JosepPage() {
               month.attributedTarget > 0 ? num(month.attributedTarget) : "—"
             }
             progressPct={month.attributedProgress.pct}
-            hint="No suman al total de compañía"
+            hint="No suman al total del equipo"
           />
         </div>
       </div>
