@@ -18,6 +18,7 @@ export default withAuth(
     const adminOnly =
       pathname === "/" ||
       pathname.startsWith("/ventas") ||
+      pathname.startsWith("/variables") ||
       pathname.startsWith("/informe");
 
     // Destino propio de cada rol cuando intenta entrar donde no debe.

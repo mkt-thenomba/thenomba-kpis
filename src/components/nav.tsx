@@ -17,6 +17,7 @@ interface NavLink {
 const LINKS: NavLink[] = [
   { href: "/", label: "Panel", roles: ["ADMIN"] },
   { href: "/ventas", label: "Registro de ventas", roles: ["ADMIN"] },
+  { href: "/variables", label: "Variables", roles: ["ADMIN"] },
   { href: "/josep", label: "Carga de Josep", roles: ["ADMIN", "INBOUND"] },
   { href: "/rodrigo", label: "Carga de Rodrigo", roles: ["ADMIN", "AGENCY"] },
 ];

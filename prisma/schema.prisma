@@ -147,6 +147,24 @@ model Target {
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// Datos manuales que necesita el cálculo de sueldos variables y que la app
+// no rastrea automáticamente (uno por mes). El resto del variable se calcula
+// desde Sale y las tablas diarias.
+// ─────────────────────────────────────────────────────────────────────
+
+model VariableInputs {
+  id              String   @id @default(cuid())
+  month           String   @unique // "aaaa-mm"
+  // Rodrigo: 30% de Agency efectivamente cobrado en el mes (€). Cobra el 5%.
+  agencyCollected Decimal  @default(0)
+  // Rodrigo: ¿es el primer mes con más de 20 embajadores activos? (bono 100 €)
+  rodrigoAmbassadorBonus Boolean @default(false)
+  // Pablo (Variable B FunSex): ¿reembolsos por debajo del 8% a 30-sept?
+  funsexRefundsOk Boolean  @default(false)
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Lista de interesados de la preventa FunSex.
 // Snapshot acumulado por fecha; el panel compara el último total con los
 // hitos (≥800 a 30-jun, ≥1.600 a 31-jul, ≥2.400 a 31-ago de 2026).
