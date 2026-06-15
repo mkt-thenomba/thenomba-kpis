@@ -30,6 +30,10 @@ const JOSEP_GLOSARIO: GlosarioItem[] = [
     def: "Mensajes de WhatsApp que inicias tú para mover un lead (no cuentan las respuestas a mensajes entrantes).",
   },
   {
+    term: "WhatsApp Leads (entrantes)",
+    def: "Leads nuevos que han escrito por WhatsApp pidiendo información ese día (conversaciones entrantes nuevas, no seguimientos).",
+  },
+  {
     term: "Ventas atribuidas",
     def: "Ventas cerradas que en los últimos 30 días han pasado por una llamada o un WhatsApp tuyo. No suman al total del equipo: solo indican tu aportación.",
   },
@@ -65,6 +69,7 @@ export default async function JosepPage() {
     callContacts: existing?.callContacts ?? 0,
     whatsappSlaMet: existing?.whatsappSlaMet ?? false,
     whatsappProactive: existing?.whatsappProactive ?? 0,
+    whatsappLeads: existing?.whatsappLeads ?? 0,
     leadsWithoutNextAction: existing?.leadsWithoutNextAction ?? 0,
     touchpointsLogged: existing?.touchpointsLogged ?? false,
     attributedSales: existing?.attributedSales ?? 0,

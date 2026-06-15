@@ -144,6 +144,7 @@ async function seedExampleData(today: Date) {
         callContacts: contacts,
         whatsappSlaMet: chance(0.85),
         whatsappProactive: randInt(5, 18),
+        whatsappLeads: randInt(8, 25),
         leadsWithoutNextAction: chance(0.7) ? 0 : randInt(1, 3),
         touchpointsLogged: chance(0.9),
         attributedSales: josepAttr,

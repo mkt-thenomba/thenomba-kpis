@@ -78,6 +78,7 @@ model JosepDaily {
   callContacts            Int      @default(0) // llamadas atendidas >60s
   whatsappSlaMet          Boolean  @default(false) // entrante respondido <2h
   whatsappProactive       Int      @default(0)
+  whatsappLeads           Int      @default(0) // leads entrantes nuevos que piden info por WhatsApp
   leadsWithoutNextAction  Int      @default(0)
   touchpointsLogged       Boolean  @default(false)
   attributedSales         Int      @default(0) // ventas ATRIBUIDAS (no suman al total)

@@ -15,6 +15,7 @@ export interface JosepDefaults {
   callContacts: number;
   whatsappSlaMet: boolean;
   whatsappProactive: number;
+  whatsappLeads: number;
   leadsWithoutNextAction: number;
   touchpointsLogged: boolean;
   attributedSales: number;
@@ -79,6 +80,12 @@ export function JosepForm({ defaults }: { defaults: JosepDefaults }) {
               name="whatsappProactive"
               label="WhatsApp proactivos"
               defaultValue={defaults.whatsappProactive}
+            />
+            <NumberField
+              name="whatsappLeads"
+              label="WhatsApp Leads (entrantes)"
+              defaultValue={defaults.whatsappLeads}
+              hint="Leads nuevos que escriben pidiendo info"
             />
             <NumberField
               name="attributedSales"
