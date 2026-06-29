@@ -66,6 +66,7 @@ export function homeForRole(role: Role): string {
       return "/josep";
     case "AGENCY":
       return "/rodrigo";
+    case "VIEWER": // Jose Lerín: solo el panel de resumen
     case "ADMIN":
     default:
       return "/";

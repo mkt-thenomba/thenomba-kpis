@@ -72,10 +72,21 @@ function addDays(d: Date, n: number): Date {
 }
 
 async function seedUsers() {
+  // Limpieza de correos antiguos (migración de dominio de Josep).
+  await prisma.user.deleteMany({ where: { email: "josep@thenomba.es" } });
+
+  // La contraseña puede venir por variable de entorno (recomendado en
+  // producción); si no, se usa la de por defecto (documentada en el README).
+  const pass = (envKey: string, fallback: string) =>
+    process.env[envKey] && process.env[envKey]!.length >= 6
+      ? process.env[envKey]!
+      : fallback;
+
   const users = [
-    { email: "pablo@thenomba.es", name: "Pablo Canela", role: "ADMIN", pass: "Pablo2026!" },
-    { email: "josep@thenomba.es", name: "Josep Adolf", role: "INBOUND", pass: "Josep2026!" },
-    { email: "rodrigo@thenomba.es", name: "Rodrigo Sangrador", role: "AGENCY", pass: "Rodrigo2026!" },
+    { email: "pablo@thenomba.es", name: "Pablo Canela", role: "ADMIN", pass: pass("SEED_PASS_PABLO", "Pablo2026!") },
+    { email: "jadolf@thenomba.com", name: "Josep Adolf", role: "INBOUND", pass: pass("SEED_PASS_JOSEP", "Josep2026!") },
+    { email: "rodrigo@thenomba.es", name: "Rodrigo Sangrador", role: "AGENCY", pass: pass("SEED_PASS_RODRIGO", "Rodrigo2026!") },
+    { email: "jlerin@thenomba.com", name: "Jose Lerín", role: "VIEWER", pass: pass("SEED_PASS_LERIN", "Lerin2026!") },
   ];
   for (const u of users) {
     const passwordHash = await bcrypt.hash(u.pass, 10);

@@ -15,17 +15,23 @@ export default withAuth(
     const role = token?.role as Role | undefined;
     const { pathname } = req.nextUrl;
 
+    // Solo ADMIN: registro de ventas, variables e informe de presentación.
     const adminOnly =
-      pathname === "/" ||
       pathname.startsWith("/ventas") ||
       pathname.startsWith("/variables") ||
       pathname.startsWith("/informe");
+
+    // Panel de resumen: ADMIN y VIEWER (Jose Lerín, solo lectura).
+    const isPanel = pathname === "/";
 
     // Destino propio de cada rol cuando intenta entrar donde no debe.
     const home = (r?: Role) =>
       r === "INBOUND" ? "/josep" : r === "AGENCY" ? "/rodrigo" : "/";
 
     if (adminOnly && role !== "ADMIN") {
+      return NextResponse.redirect(new URL(home(role), req.url));
+    }
+    if (isPanel && !(role === "ADMIN" || role === "VIEWER")) {
       return NextResponse.redirect(new URL(home(role), req.url));
     }
     if (pathname.startsWith("/josep") && !(role === "ADMIN" || role === "INBOUND")) {

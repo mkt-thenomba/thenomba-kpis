@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 
 const USUARIOS = [
   { email: "pablo@thenomba.es", nombre: "Pablo", rol: "Dirección" },
-  { email: "josep@thenomba.es", nombre: "Josep Adolf", rol: "Captación entrante" },
+  { email: "jadolf@thenomba.com", nombre: "Josep Adolf", rol: "Captación entrante" },
   { email: "rodrigo@thenomba.es", nombre: "Rodrigo Sangrador", rol: "Agencia" },
+  { email: "jlerin@thenomba.com", nombre: "Jose Lerín", rol: "Resumen (solo lectura)" },
 ];
 
 export default function LoginPage() {

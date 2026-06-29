@@ -5,13 +5,14 @@
 // que se muestran en la interfaz (siempre en castellano de España).
 
 // ── Roles ──────────────────────────────────────────────────────────────
-export const ROLES = ["ADMIN", "INBOUND", "AGENCY"] as const;
+export const ROLES = ["ADMIN", "INBOUND", "AGENCY", "VIEWER"] as const;
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Dirección",
   INBOUND: "Captación entrante",
   AGENCY: "Agencia",
+  VIEWER: "Resumen (solo lectura)",
 };
 
 // ── Producto ─────────────────────────────────────────────────────────────

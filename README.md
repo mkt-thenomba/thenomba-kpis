@@ -56,11 +56,16 @@ Luego abre **http://localhost:3000** en el navegador.
 
 ## Usuarios y contraseñas iniciales
 
-| Persona            | Correo                | Contraseña     | Ve…                          |
-| ------------------ | --------------------- | -------------- | ---------------------------- |
-| Pablo (Dirección)  | `pablo@thenomba.es`   | `Pablo2026!`   | Todo: panel, ventas, cargas  |
-| Josep (Entrante)   | `josep@thenomba.es`   | `Josep2026!`   | Solo su pantalla de carga    |
-| Rodrigo (Agencia)  | `rodrigo@thenomba.es` | `Rodrigo2026!` | Solo su pantalla de carga    |
+| Persona               | Correo                | Contraseña     | Ve…                            |
+| --------------------- | --------------------- | -------------- | ------------------------------ |
+| Pablo (Dirección)     | `pablo@thenomba.es`   | `Pablo2026!`   | Todo: panel, ventas, variables, cargas |
+| Josep (Entrante)      | `jadolf@thenomba.com` | `Josep2026!`   | Solo su pantalla de carga      |
+| Rodrigo (Agencia)     | `rodrigo@thenomba.es` | `Rodrigo2026!` | Solo su pantalla de carga      |
+| Jose Lerín (Resumen)  | `jlerin@thenomba.com` | `Lerin2026!`   | Solo el Panel de resumen (lectura) |
+
+> En producción puedes fijar contraseñas propias con variables de entorno en
+> Vercel (`SEED_PASS_PABLO`, `SEED_PASS_JOSEP`, `SEED_PASS_RODRIGO`,
+> `SEED_PASS_LERIN`); si no se ponen, se usan las de la tabla.
 
 ### Cambiar una contraseña
 
