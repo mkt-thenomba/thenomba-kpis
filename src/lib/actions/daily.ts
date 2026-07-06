@@ -70,6 +70,12 @@ export async function saveRodrigoDaily(formData: FormData) {
     networkContacted14d: toBool(formData.get("networkContacted14d")),
     attributableSales: toInt(formData.get("attributableSales")),
     tramo,
+    ambassadorsWithCode: toInt(formData.get("ambassadorsWithCode")),
+    ambassadorsActive: toInt(formData.get("ambassadorsActive")),
+    socialActions: toInt(formData.get("socialActions")),
+    outreachAttempts: toInt(formData.get("outreachAttempts")),
+    outreachMeetings: toInt(formData.get("outreachMeetings")),
+    outreachProposals: toInt(formData.get("outreachProposals")),
     notes: String(formData.get("notes") ?? ""),
   };
 

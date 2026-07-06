@@ -96,13 +96,21 @@ model RodrigoDaily {
   date                DateTime @unique // un único registro por día (upsert)
   newProspects        Int      @default(0)
   prospectsIberoamerica Int    @default(0)
-  ambassadorsSigned   Int      @default(0)
+  ambassadorsSigned   Int      @default(0) // "Cierres": contratos de embajador firmados ese día
   verifiedPosts       Int      @default(0)
   bitlyClicks         Int      @default(0)
-  agencyPieces        Int      @default(0)
+  agencyPieces        Int      @default(0) // "Acciones de agency": stories, posts, vídeos YouTube…
   networkContacted14d Boolean  @default(false)
   attributableSales   Int      @default(0) // ventas ATRIBUIBLES (no suman al total)
   tramo               String   @default("MIXTO") // Tramo: TOP | RESTO | MIXTO
+  // ── Embajadores (fotos del momento: se toma el último valor, no se suma) ──
+  ambassadorsWithCode Int      @default(0) // total de embajadores con código (acuerdo cerrado)
+  ambassadorsActive   Int      @default(0) // embajadores que han publicado algo esta semana
+  // ── Actividad que se suma ──
+  socialActions       Int      @default(0) // acciones RRSS de embajadores (stories/posts/reels)
+  outreachAttempts    Int      @default(0) // intentos: mensajes enviados (con o sin respuesta)
+  outreachMeetings    Int      @default(0) // reuniones: llamadas / videollamadas
+  outreachProposals   Int      @default(0) // propuestas enviadas
   notes               String   @default("")
   createdAt           DateTime @default(now())
 }

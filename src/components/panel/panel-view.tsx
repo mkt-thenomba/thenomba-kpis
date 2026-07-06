@@ -237,6 +237,54 @@ export function PanelView({ data }: { data: PanelData }) {
             value={num(rodrigoMonth.ambassadors)}
           />
         </div>
+
+        {/* Embajadores: fotos del momento + actividad */}
+        <div className="mt-4 grid gap-4 md:grid-cols-4">
+          <KpiCard
+            title="Embajadores con código"
+            value={num(rodrigoMonth.ambassadorsWithCode)}
+            hint="Con acuerdo cerrado"
+          />
+          <KpiCard
+            title="Embajadores activos"
+            value={num(rodrigoMonth.ambassadorsActive)}
+            hint="Publicaron esta semana"
+          />
+          <KpiCard
+            title="Acciones en RRSS (mes)"
+            value={num(rodrigoMonth.socialActions)}
+            hint="Stories, posts, reels de la red"
+          />
+          <KpiCard
+            title="Acciones de agency (mes)"
+            value={num(rodrigoMonth.agencyActions)}
+            hint="Piezas gestionadas por la agencia"
+          />
+        </div>
+
+        {/* Embudo de captación de nuevos embajadores */}
+        <Card className="mt-4 p-5">
+          <p className="mb-3 text-sm font-medium text-muted-foreground">
+            Captación de nuevos embajadores (mes)
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { label: "Intentos", value: rodrigoMonth.outreach.attempts },
+              { label: "Reuniones", value: rodrigoMonth.outreach.meetings },
+              { label: "Propuestas", value: rodrigoMonth.outreach.proposals },
+              { label: "Cierres", value: rodrigoMonth.outreach.closed },
+            ].map((s) => (
+              <div key={s.label}>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {s.label}
+                </p>
+                <p className="mt-1 text-2xl font-bold tracking-tight">
+                  {num(s.value)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
       </section>
 
       {/* ── BLOQUE FUNSEX ── */}

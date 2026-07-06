@@ -34,8 +34,36 @@ const RODRIGO_GLOSARIO: GlosarioItem[] = [
     def: "Piezas de contenido producidas por la agencia ese día (vídeos, posts, creatividades…).",
   },
   {
-    term: "Embajadores firmados",
-    def: "Embajadores que han firmado su alta ese día.",
+    term: "Embajadores con código",
+    def: "Total de embajadores que ya tienen código de embajador, es decir, con acuerdo cerrado. Es una foto del momento (el total a día de hoy), no una suma diaria.",
+  },
+  {
+    term: "Embajadores activos",
+    def: "Número de embajadores que han publicado algo de TheNomba esta semana. Foto de la semana, no se suma día a día.",
+  },
+  {
+    term: "Acciones en RRSS",
+    def: "Acciones publicadas por los embajadores: stories, posts, reels, lo que sea. Si un embajador cuelga 3 cosas, cuentan como 3.",
+  },
+  {
+    term: "Captación · Intentos",
+    def: "Mensajes enviados a posibles nuevos embajadores, tengan respuesta o no.",
+  },
+  {
+    term: "Captación · Reuniones",
+    def: "Llamadas o videollamadas mantenidas con posibles embajadores.",
+  },
+  {
+    term: "Captación · Propuestas",
+    def: "Propuestas de colaboración enviadas a posibles embajadores.",
+  },
+  {
+    term: "Cierres (embajadores firmados)",
+    def: "Contratos de embajador firmados: el último paso del embudo de captación.",
+  },
+  {
+    term: "Acciones de agency",
+    def: "Piezas publicadas gestionadas por la agencia: stories, posts, vídeos de YouTube, etc.",
   },
   {
     term: "Ventas atribuibles",
@@ -75,6 +103,12 @@ export default async function RodrigoPage() {
     networkContacted14d: existing?.networkContacted14d ?? false,
     attributableSales: existing?.attributableSales ?? 0,
     tramo: (existing?.tramo as Tramo) ?? "MIXTO",
+    ambassadorsWithCode: existing?.ambassadorsWithCode ?? 0,
+    ambassadorsActive: existing?.ambassadorsActive ?? 0,
+    socialActions: existing?.socialActions ?? 0,
+    outreachAttempts: existing?.outreachAttempts ?? 0,
+    outreachMeetings: existing?.outreachMeetings ?? 0,
+    outreachProposals: existing?.outreachProposals ?? 0,
     notes: existing?.notes ?? "",
     existed: !!existing,
   };

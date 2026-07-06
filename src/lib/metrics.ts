@@ -464,8 +464,20 @@ export interface RodrigoMonth {
   bitlyClicks: number;
   bitlyTarget: number;
   bitlyProgress: TargetProgress;
-  ambassadors: number; // embajadores firmados (activos) en el mes
+  ambassadors: number; // "Cierres": embajadores firmados en el mes (suma)
   semBitly: SemaforoResult;
+  // Embajadores (fotos del momento: último valor registrado)
+  ambassadorsWithCode: number;
+  ambassadorsActive: number;
+  // Actividad acumulada del mes
+  socialActions: number; // acciones RRSS de embajadores
+  agencyActions: number; // acciones de agency (piezas)
+  outreach: {
+    attempts: number;
+    meetings: number;
+    proposals: number;
+    closed: number; // = embajadores firmados (suma)
+  };
 }
 
 export async function getRodrigoMonth(month: string): Promise<RodrigoMonth> {
@@ -487,6 +499,11 @@ export async function getRodrigoMonth(month: string): Promise<RodrigoMonth> {
   };
   let bitlyClicks = 0;
   let ambassadors = 0;
+  let socialActions = 0;
+  let agencyActions = 0;
+  let attempts = 0;
+  let meetings = 0;
+  let proposals = 0;
   for (const r of rows) {
     const tramo = (r.tramo as Tramo) in attributableByTramo
       ? (r.tramo as Tramo)
@@ -494,7 +511,22 @@ export async function getRodrigoMonth(month: string): Promise<RodrigoMonth> {
     attributableByTramo[tramo] += r.attributableSales;
     bitlyClicks += r.bitlyClicks;
     ambassadors += r.ambassadorsSigned;
+    socialActions += r.socialActions;
+    agencyActions += r.agencyPieces;
+    attempts += r.outreachAttempts;
+    meetings += r.outreachMeetings;
+    proposals += r.outreachProposals;
   }
+
+  // Snapshots (embajadores con código / activos): último valor >0 registrado.
+  const ordered = [...rows].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const latest = (sel: (r: (typeof rows)[number]) => number): number => {
+    for (let i = ordered.length - 1; i >= 0; i--) {
+      const v = sel(ordered[i]);
+      if (v > 0) return v;
+    }
+    return 0;
+  };
 
   const topTarget = topT?.salesTarget ?? 0;
   const restoTarget = restoT?.salesTarget ?? 0;
@@ -510,6 +542,11 @@ export async function getRodrigoMonth(month: string): Promise<RodrigoMonth> {
     bitlyProgress: progress(bitlyClicks, THRESHOLDS.rodrigoBitlyClicksMonth),
     ambassadors,
     semBitly: semaforo(bitlyClicks, THRESHOLDS.rodrigoBitlyClicksMonth),
+    ambassadorsWithCode: latest((r) => r.ambassadorsWithCode),
+    ambassadorsActive: latest((r) => r.ambassadorsActive),
+    socialActions,
+    agencyActions,
+    outreach: { attempts, meetings, proposals, closed: ambassadors },
   };
 }
 

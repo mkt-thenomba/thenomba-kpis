@@ -179,6 +179,12 @@ async function seedExampleData(today: Date) {
         networkContacted14d: chance(0.8),
         attributableSales: randInt(0, 2),
         tramo: pick(["TOP", "RESTO", "MIXTO"] as const),
+        ambassadorsWithCode: randInt(14, 20),
+        ambassadorsActive: randInt(9, 16),
+        socialActions: randInt(4, 14),
+        outreachAttempts: randInt(3, 10),
+        outreachMeetings: randInt(0, 3),
+        outreachProposals: randInt(0, 2),
         notes: "",
       },
     });
