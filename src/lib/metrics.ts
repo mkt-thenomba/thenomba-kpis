@@ -330,6 +330,8 @@ export interface JosepWeek {
   semSla: SemaforoResult;
   semLeads: SemaforoResult;
   semConversion: SemaforoResult;
+  privateSessionsWeek: number;
+  whatsappLeadsWeek: number;
 }
 
 export async function getJosepWeek(ref: Date): Promise<JosepWeek> {
@@ -349,6 +351,8 @@ export async function getJosepWeek(ref: Date): Promise<JosepWeek> {
   const slaDays = rows.filter((r) => r.whatsappSlaMet).length;
   const slaPct = daysLogged > 0 ? (slaDays / daysLogged) * 100 : 0;
   const conversionPct = contacts > 0 ? (attributedSalesWeek / contacts) * 100 : 0;
+  const privateSessionsWeek = rows.reduce((a, r) => a + r.privateSessions, 0);
+  const whatsappLeadsWeek = rows.reduce((a, r) => a + r.whatsappLeads, 0);
 
   // Series para el aviso sostenido (últimos 5 días laborables registrados).
   const contactSeries = rows.map((r) => r.callContacts);
@@ -384,6 +388,8 @@ export async function getJosepWeek(ref: Date): Promise<JosepWeek> {
         THRESHOLDS.josepConversionPct
       ),
     },
+    privateSessionsWeek,
+    whatsappLeadsWeek,
   };
 }
 

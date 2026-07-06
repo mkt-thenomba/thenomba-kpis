@@ -32,6 +32,7 @@ export async function saveJosepDaily(formData: FormData) {
     whatsappSlaMet: toBool(formData.get("whatsappSlaMet")),
     whatsappProactive: toInt(formData.get("whatsappProactive")),
     whatsappLeads: toInt(formData.get("whatsappLeads")),
+    privateSessions: toInt(formData.get("privateSessions")),
     leadsWithoutNextAction: toInt(formData.get("leadsWithoutNextAction")),
     touchpointsLogged: toBool(formData.get("touchpointsLogged")),
     attributedSales: toInt(formData.get("attributedSales")),

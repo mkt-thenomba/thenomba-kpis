@@ -34,6 +34,10 @@ const JOSEP_GLOSARIO: GlosarioItem[] = [
     def: "Leads nuevos que han escrito por WhatsApp pidiendo información ese día (conversaciones entrantes nuevas, no seguimientos).",
   },
   {
+    term: "Sesiones privadas",
+    def: "Sesiones que Josep cierra con un lead para enseñarle la plataforma a fondo y resolver dudas. Cuenta cada sesión realizada ese día.",
+  },
+  {
     term: "Ventas atribuidas",
     def: "Ventas cerradas que en los últimos 30 días han pasado por una llamada o un WhatsApp tuyo. No suman al total del equipo: solo indican tu aportación.",
   },
@@ -70,6 +74,7 @@ export default async function JosepPage() {
     whatsappSlaMet: existing?.whatsappSlaMet ?? false,
     whatsappProactive: existing?.whatsappProactive ?? 0,
     whatsappLeads: existing?.whatsappLeads ?? 0,
+    privateSessions: existing?.privateSessions ?? 0,
     leadsWithoutNextAction: existing?.leadsWithoutNextAction ?? 0,
     touchpointsLogged: existing?.touchpointsLogged ?? false,
     attributedSales: existing?.attributedSales ?? 0,
@@ -97,7 +102,7 @@ export default async function JosepPage() {
 
           <div>
             <h2 className="mb-3 text-lg font-semibold">Mi semana de un vistazo</h2>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <KpiCard
                 title="Contactos de la semana"
                 value={num(week.contacts)}
@@ -110,6 +115,10 @@ export default async function JosepPage() {
                 value={pct(week.slaPct, true)}
                 target="≥ 90 %"
                 semaforo={week.semSla}
+              />
+              <KpiCard
+                title="Sesiones privadas (semana)"
+                value={num(week.privateSessionsWeek)}
               />
               <KpiCard
                 title="Ventas atribuidas (mes)"

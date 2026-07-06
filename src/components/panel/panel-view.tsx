@@ -126,7 +126,7 @@ export function PanelView({ data }: { data: PanelData }) {
       {/* ── BLOQUE A: JOSEP ── */}
       <section>
         <SectionTitle>Bloque A · Josep (captación entrante)</SectionTitle>
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <KpiCard
             title="Contactos de la semana"
             value={num(josepWeek.contacts)}
@@ -152,6 +152,10 @@ export function PanelView({ data }: { data: PanelData }) {
             value={pct(josepWeek.conversionPct, true)}
             target="≥ 4 %"
             semaforo={josepWeek.semConversion}
+          />
+          <KpiCard
+            title="Sesiones privadas (semana)"
+            value={num(josepWeek.privateSessionsWeek)}
           />
         </div>
       </section>
