@@ -41,28 +41,23 @@ function parseDateOrNull(v: FormDataEntryValue | null): Date | null {
   return isNaN(d.getTime()) ? null : dayStart(d);
 }
 
-export async function createSaleState(
-  _prev: SaveState,
+// Construye (y valida) los datos de una venta desde el formulario.
+// daysLeadToSale se calcula SIEMPRE en el servidor desde las dos fechas.
+function parseSaleForm(
   formData: FormData
-): Promise<SaveState> {
-  await requireRole("ADMIN", "INBOUND");
-
+): { error: string } | { data: Parameters<typeof prisma.sale.create>[0]["data"] } {
   const saleDate = parseDateOrNull(formData.get("saleDate"));
   const customerName = String(formData.get("customerName") ?? "").trim();
   const amount = parseFloat(String(formData.get("amount") ?? ""));
 
-  if (!saleDate) return { ok: false, error: "Falta la fecha de venta.", savedAt: null };
-  if (!customerName)
-    return { ok: false, error: "Falta el nombre del cliente.", savedAt: null };
-  if (!Number.isFinite(amount) || amount < 0)
-    return { ok: false, error: "Importe no válido.", savedAt: null };
+  if (!saleDate) return { error: "Falta la fecha de venta." };
+  if (!customerName) return { error: "Falta el nombre del cliente." };
+  if (!Number.isFinite(amount) || amount < 0) return { error: "Importe no válido." };
 
   const leadEntryDate = parseDateOrNull(formData.get("leadEntryDate"));
-  // daysLeadToSale calculado SOLO en el servidor.
   const daysLeadToSale =
     leadEntryDate && saleDate ? daysBetween(saleDate, leadEntryDate) : null;
 
-  // Touchpoints: checkboxes con name="touchpoints" (múltiples valores).
   const tps = formData
     .getAll("touchpoints")
     .map(String)
@@ -70,7 +65,7 @@ export async function createSaleState(
 
   const discountCode = String(formData.get("discountCode") ?? "").trim() || null;
 
-  await prisma.sale.create({
+  return {
     data: {
       saleDate,
       customerName,
@@ -94,7 +89,38 @@ export async function createSaleState(
       attributedPaid: formData.get("attributedPaid") === "on",
       touchpoints: JSON.stringify(tps),
     },
-  });
+  };
+}
+
+export async function createSaleState(
+  _prev: SaveState,
+  formData: FormData
+): Promise<SaveState> {
+  await requireRole("ADMIN", "INBOUND");
+
+  const parsed = parseSaleForm(formData);
+  if ("error" in parsed) return { ok: false, error: parsed.error, savedAt: null };
+
+  await prisma.sale.create({ data: parsed.data });
+
+  revalidatePath("/ventas");
+  revalidatePath("/");
+  return { ok: true, savedAt: Date.now() };
+}
+
+export async function updateSaleState(
+  _prev: SaveState,
+  formData: FormData
+): Promise<SaveState> {
+  await requireRole("ADMIN", "INBOUND");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "Venta no encontrada.", savedAt: null };
+
+  const parsed = parseSaleForm(formData);
+  if ("error" in parsed) return { ok: false, error: parsed.error, savedAt: null };
+
+  await prisma.sale.update({ where: { id }, data: parsed.data });
 
   revalidatePath("/ventas");
   revalidatePath("/");

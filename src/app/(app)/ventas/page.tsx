@@ -32,7 +32,7 @@ import {
   type Product,
   type EntryChannel,
 } from "@/types/domain";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 
 interface SearchParams {
   from?: string;
@@ -40,6 +40,7 @@ interface SearchParams {
   product?: string;
   channel?: string;
   code?: string;
+  edit?: string;
 }
 
 // Definiciones de las casillas del registro de ventas. Ajusta las que no
@@ -107,16 +108,46 @@ export default async function VentasPage({
   if (searchParams.code)
     where.discountCode = { contains: searchParams.code };
 
-  const [sales, revenue] = await Promise.all([
+  const [sales, revenue, editSaleRow] = await Promise.all([
     prisma.sale.findMany({
       where,
       orderBy: { saleDate: "desc" },
       take: 200,
     }),
     getRevenueAccumulators(today),
+    searchParams.edit
+      ? prisma.sale.findUnique({ where: { id: searchParams.edit } })
+      : Promise.resolve(null),
   ]);
 
   const totalImporte = sales.reduce((a, s) => a + Number(s.amount), 0);
+
+  // Venta a editar → valores iniciales del formulario.
+  const editValues = editSaleRow
+    ? {
+        id: editSaleRow.id,
+        saleDate: format(editSaleRow.saleDate, "yyyy-MM-dd"),
+        customerName: editSaleRow.customerName,
+        product: editSaleRow.product,
+        amount: Number(editSaleRow.amount),
+        paymentType: editSaleRow.paymentType,
+        entryChannel: editSaleRow.entryChannel,
+        leadEntryDate: editSaleRow.leadEntryDate
+          ? format(editSaleRow.leadEntryDate, "yyyy-MM-dd")
+          : "",
+        discountCode: editSaleRow.discountCode ?? "",
+        attributedJosep: editSaleRow.attributedJosep,
+        attributedPaid: editSaleRow.attributedPaid,
+        attributedCode: editSaleRow.attributedCode,
+        touchpoints: (() => {
+          try {
+            return JSON.parse(editSaleRow.touchpoints || "[]") as string[];
+          } catch {
+            return [];
+          }
+        })(),
+      }
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -129,8 +160,8 @@ export default async function VentasPage({
 
       <MoneyAccumulators data={revenue} title="Facturación acumulada del equipo" />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <SaleForm todayISO={todayISO} />
+      <div id="form" className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <SaleForm todayISO={todayISO} edit={editValues} />
         <Glosario className="h-fit xl:sticky xl:top-20" items={VENTAS_GLOSARIO} />
       </div>
 
@@ -238,18 +269,31 @@ export default async function VentasPage({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <form action={deleteSale}>
-                      <input type="hidden" name="id" value={s.id} />
+                    <div className="flex items-center justify-end gap-1">
                       <Button
-                        type="submit"
+                        asChild
                         variant="ghost"
                         size="icon"
-                        title="Eliminar venta"
-                        className="text-muted-foreground hover:text-bad"
+                        title="Editar venta"
+                        className="text-muted-foreground hover:text-foreground"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Link href={`/ventas?edit=${s.id}#form`}>
+                          <Pencil className="h-4 w-4" />
+                        </Link>
                       </Button>
-                    </form>
+                      <form action={deleteSale}>
+                        <input type="hidden" name="id" value={s.id} />
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          size="icon"
+                          title="Eliminar venta (p. ej. devoluciones)"
+                          className="text-muted-foreground hover:text-bad"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </form>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

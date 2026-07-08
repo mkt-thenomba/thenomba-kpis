@@ -1,8 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { createSaleState, type SaveState } from "@/lib/actions/sales";
+import {
+  createSaleState,
+  updateSaleState,
+  type SaveState,
+} from "@/lib/actions/sales";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,48 +24,90 @@ import {
   TOUCHPOINT_LABELS,
 } from "@/types/domain";
 
-function SubmitButton() {
+// Valores iniciales para editar una venta existente.
+export interface SaleFormValues {
+  id: string;
+  saleDate: string; // yyyy-mm-dd
+  customerName: string;
+  product: string;
+  amount: number;
+  paymentType: string;
+  entryChannel: string;
+  leadEntryDate: string; // yyyy-mm-dd | ""
+  discountCode: string;
+  attributedJosep: boolean;
+  attributedPaid: boolean;
+  attributedCode: boolean;
+  touchpoints: string[];
+}
+
+function SubmitButton({ editing }: { editing: boolean }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" size="lg" disabled={pending}>
-      {pending ? "Guardando…" : "Registrar venta"}
+      {pending ? "Guardando…" : editing ? "Guardar cambios" : "Registrar venta"}
     </Button>
   );
 }
 
-export function SaleForm({ todayISO }: { todayISO: string }) {
+export function SaleForm({
+  todayISO,
+  edit,
+}: {
+  todayISO: string;
+  edit?: SaleFormValues;
+}) {
+  const editing = !!edit;
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useFormState<SaveState, FormData>(
     async (prev, fd) => {
-      const res = await createSaleState(prev, fd);
-      if (res.ok) formRef.current?.reset();
+      const res = editing
+        ? await updateSaleState(prev, fd)
+        : await createSaleState(prev, fd);
+      // Al crear (no al editar) se limpia el formulario para la siguiente venta.
+      if (res.ok && !editing) formRef.current?.reset();
       return res;
     },
     { ok: false, savedAt: null }
   );
 
   return (
-    <Card>
+    <Card className={editing ? "border-primary" : undefined}>
       <CardHeader>
-        <CardTitle>Registrar una venta</CardTitle>
+        <CardTitle>{editing ? "Editar venta" : "Registrar una venta"}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Los días entre la entrada del lead y la venta se calculan solos.
+          {editing
+            ? "Corrige los datos y guarda los cambios."
+            : "Los días entre la entrada del lead y la venta se calculan solos."}
         </p>
       </CardHeader>
       <CardContent>
         <form ref={formRef} action={formAction} className="space-y-5">
+          {editing && <input type="hidden" name="id" value={edit!.id} />}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-1.5">
               <Label htmlFor="saleDate">Fecha de venta</Label>
-              <Input id="saleDate" name="saleDate" type="date" defaultValue={todayISO} required />
+              <Input
+                id="saleDate"
+                name="saleDate"
+                type="date"
+                defaultValue={edit?.saleDate ?? todayISO}
+                required
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="customerName">Cliente</Label>
-              <Input id="customerName" name="customerName" placeholder="Nombre y apellidos" required />
+              <Input
+                id="customerName"
+                name="customerName"
+                placeholder="Nombre y apellidos"
+                defaultValue={edit?.customerName ?? ""}
+                required
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="product">Producto</Label>
-              <Select id="product" name="product">
+              <Select id="product" name="product" defaultValue={edit?.product ?? "YOUTH"}>
                 {PRODUCTS.map((p) => (
                   <option key={p} value={p}>
                     {PRODUCT_LABELS[p]}
@@ -70,11 +117,24 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="amount">Importe (€)</Label>
-              <Input id="amount" name="amount" type="number" min={0} step="0.01" placeholder="0,00" required />
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                min={0}
+                step="0.01"
+                placeholder="0,00"
+                defaultValue={edit ? String(edit.amount) : ""}
+                required
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="paymentType">Forma de pago</Label>
-              <Select id="paymentType" name="paymentType">
+              <Select
+                id="paymentType"
+                name="paymentType"
+                defaultValue={edit?.paymentType ?? "UNICO"}
+              >
                 {PAYMENT_TYPES.map((p) => (
                   <option key={p} value={p}>
                     {PAYMENT_TYPE_LABELS[p]}
@@ -84,7 +144,11 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="entryChannel">Canal de entrada</Label>
-              <Select id="entryChannel" name="entryChannel">
+              <Select
+                id="entryChannel"
+                name="entryChannel"
+                defaultValue={edit?.entryChannel ?? "ORGANICO"}
+              >
                 {ENTRY_CHANNELS.map((c) => (
                   <option key={c} value={c}>
                     {ENTRY_CHANNEL_LABELS[c]}
@@ -94,11 +158,21 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="leadEntryDate">Entrada del lead (opcional)</Label>
-              <Input id="leadEntryDate" name="leadEntryDate" type="date" />
+              <Input
+                id="leadEntryDate"
+                name="leadEntryDate"
+                type="date"
+                defaultValue={edit?.leadEntryDate ?? ""}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="discountCode">Código de descuento (opcional)</Label>
-              <Input id="discountCode" name="discountCode" placeholder="p. ej. VERANO" />
+              <Input
+                id="discountCode"
+                name="discountCode"
+                placeholder="p. ej. VERANO"
+                defaultValue={edit?.discountCode ?? ""}
+              />
             </div>
           </div>
 
@@ -111,15 +185,15 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
             </legend>
             <div className="flex flex-wrap gap-4">
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="attributedJosep" className="h-4 w-4 accent-[hsl(var(--primary))]" />
+                <input type="checkbox" name="attributedJosep" defaultChecked={edit?.attributedJosep} className="h-4 w-4 accent-[hsl(var(--primary))]" />
                 Atribuida a Josep
               </label>
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="attributedPaid" className="h-4 w-4 accent-[hsl(var(--primary))]" />
+                <input type="checkbox" name="attributedPaid" defaultChecked={edit?.attributedPaid} className="h-4 w-4 accent-[hsl(var(--primary))]" />
                 Atribuida a canal de pago
               </label>
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="attributedCode" className="h-4 w-4 accent-[hsl(var(--primary))]" />
+                <input type="checkbox" name="attributedCode" defaultChecked={edit?.attributedCode} className="h-4 w-4 accent-[hsl(var(--primary))]" />
                 Atribuida a embajador
               </label>
             </div>
@@ -130,16 +204,31 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
             <div className="flex flex-wrap gap-3">
               {TOUCHPOINTS.map((t) => (
                 <label key={t} className="flex items-center gap-2 rounded-md border border-input bg-card px-3 py-1.5 text-sm">
-                  <input type="checkbox" name="touchpoints" value={t} className="h-4 w-4 accent-[hsl(var(--primary))]" />
+                  <input
+                    type="checkbox"
+                    name="touchpoints"
+                    value={t}
+                    defaultChecked={edit?.touchpoints.includes(t)}
+                    className="h-4 w-4 accent-[hsl(var(--primary))]"
+                  />
                   {TOUCHPOINT_LABELS[t]}
                 </label>
               ))}
             </div>
           </fieldset>
 
-          <div className="flex items-center gap-3">
-            <SubmitButton />
-            {state.ok && <span className="text-sm text-ok">Venta registrada.</span>}
+          <div className="flex flex-wrap items-center gap-3">
+            <SubmitButton editing={editing} />
+            {editing && (
+              <Button asChild variant="outline">
+                <Link href="/ventas">Cancelar</Link>
+              </Button>
+            )}
+            {state.ok && (
+              <span className="text-sm text-ok">
+                {editing ? "Cambios guardados." : "Venta registrada."}
+              </span>
+            )}
             {state.error && <span className="text-sm text-bad">{state.error}</span>}
           </div>
         </form>
