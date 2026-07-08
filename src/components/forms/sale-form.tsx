@@ -120,7 +120,7 @@ export function SaleForm({ todayISO }: { todayISO: string }) {
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="attributedCode" className="h-4 w-4 accent-[hsl(var(--primary))]" />
-                Atribuida a código
+                Atribuida a embajador
               </label>
             </div>
           </fieldset>

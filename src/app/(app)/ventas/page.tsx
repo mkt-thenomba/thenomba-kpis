@@ -75,7 +75,7 @@ const VENTAS_GLOSARIO: GlosarioItem[] = [
   },
   {
     term: "Atribuciones",
-    def: "A quién o a qué se le apunta la venta (Josep, canal de pago, código). Pueden marcarse varias a la vez y NO suman al total del equipo: solo sirven para ver quién empuja.",
+    def: "A quién o a qué se le apunta la venta (Josep, canal de pago, embajador). Pueden marcarse varias a la vez y NO suman al total del equipo: solo sirven para ver quién empuja.",
   },
   {
     term: "Touchpoints presentes",
@@ -234,7 +234,7 @@ export default async function VentasPage({
                     <div className="flex flex-wrap gap-1">
                       {s.attributedJosep && <Badge variant="secondary">Josep</Badge>}
                       {s.attributedPaid && <Badge variant="secondary">Pago</Badge>}
-                      {s.attributedCode && <Badge variant="secondary">Código</Badge>}
+                      {s.attributedCode && <Badge variant="secondary">Embajador</Badge>}
                     </div>
                   </TableCell>
                   <TableCell>
