@@ -88,7 +88,7 @@ export default async function VentasPage({
 }: {
   searchParams: SearchParams;
 }) {
-  await requireRole("ADMIN");
+  await requireRole("ADMIN", "INBOUND");
 
   const today = dayStart(new Date());
   const todayISO = format(today, "yyyy-MM-dd");

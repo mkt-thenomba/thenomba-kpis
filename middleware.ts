@@ -15,9 +15,8 @@ export default withAuth(
     const role = token?.role as Role | undefined;
     const { pathname } = req.nextUrl;
 
-    // Solo ADMIN: registro de ventas, variables e informe de presentación.
+    // Solo ADMIN: variables e informe de presentación.
     const adminOnly =
-      pathname.startsWith("/ventas") ||
       pathname.startsWith("/variables") ||
       pathname.startsWith("/informe");
 
@@ -32,6 +31,12 @@ export default withAuth(
       return NextResponse.redirect(new URL(home(role), req.url));
     }
     if (isPanel && !(role === "ADMIN" || role === "VIEWER")) {
+      return NextResponse.redirect(new URL(home(role), req.url));
+    }
+    if (
+      pathname.startsWith("/ventas") &&
+      !(role === "ADMIN" || role === "INBOUND")
+    ) {
       return NextResponse.redirect(new URL(home(role), req.url));
     }
     if (pathname.startsWith("/josep") && !(role === "ADMIN" || role === "INBOUND")) {

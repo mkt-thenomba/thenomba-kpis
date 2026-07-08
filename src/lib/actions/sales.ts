@@ -45,7 +45,7 @@ export async function createSaleState(
   _prev: SaveState,
   formData: FormData
 ): Promise<SaveState> {
-  await requireRole("ADMIN");
+  await requireRole("ADMIN", "INBOUND");
 
   const saleDate = parseDateOrNull(formData.get("saleDate"));
   const customerName = String(formData.get("customerName") ?? "").trim();
@@ -102,7 +102,7 @@ export async function createSaleState(
 }
 
 export async function deleteSale(formData: FormData) {
-  await requireRole("ADMIN");
+  await requireRole("ADMIN", "INBOUND");
   const id = String(formData.get("id") ?? "");
   if (id) {
     await prisma.sale.delete({ where: { id } });
