@@ -79,21 +79,32 @@ const RODRIGO_GLOSARIO: GlosarioItem[] = [
   },
 ];
 
-export default async function RodrigoPage() {
+export default async function RodrigoPage({
+  searchParams,
+}: {
+  searchParams: { date?: string };
+}) {
   await requireRole("ADMIN", "AGENCY");
 
   const today = dayStart(new Date());
   const todayISO = format(today, "yyyy-MM-dd");
 
+  const selectedISO = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.date ?? "")
+    ? searchParams.date!
+    : todayISO;
+  const selectedDate = dayStart(new Date(selectedISO + "T00:00:00"));
+  const isToday = selectedISO === todayISO;
+
   const [existing, week, month, reminder] = await Promise.all([
-    prisma.rodrigoDaily.findUnique({ where: { date: today } }),
-    getRodrigoWeek(today),
-    getRodrigoMonth(monthKey(today)),
+    prisma.rodrigoDaily.findUnique({ where: { date: selectedDate } }),
+    getRodrigoWeek(selectedDate),
+    getRodrigoMonth(monthKey(selectedDate)),
     getLoadReminder(today),
   ]);
 
   const defaults: RodrigoDefaults = {
-    date: todayISO,
+    date: selectedISO,
+    isToday,
     newProspects: existing?.newProspects ?? 0,
     prospectsIberoamerica: existing?.prospectsIberoamerica ?? 0,
     ambassadorsSigned: existing?.ambassadorsSigned ?? 0,
@@ -119,7 +130,7 @@ export default async function RodrigoPage() {
         <h1 className="text-2xl font-bold tracking-tight">
           Carga diaria · Rodrigo
         </h1>
-        <p className="text-muted-foreground">{fechaLarga(today)}</p>
+        <p className="text-muted-foreground">{fechaLarga(selectedDate)}</p>
       </div>
 
       {reminder.rodrigoPending && (

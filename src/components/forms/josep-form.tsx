@@ -3,6 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { saveJosepDailyState, type SaveState } from "@/lib/actions/daily";
 import { NumberField, ToggleField } from "@/components/forms/fields";
+import { DateField } from "@/components/forms/date-field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +13,7 @@ import { Check } from "lucide-react";
 
 export interface JosepDefaults {
   date: string; // ISO yyyy-mm-dd
+  isToday: boolean;
   callContacts: number;
   whatsappSlaMet: boolean;
   whatsappProactive: number;
@@ -50,17 +52,21 @@ export function JosepForm({ defaults }: { defaults: JosepDefaults }) {
 
   return (
     <form action={formAction}>
-      <input type="hidden" name="date" value={defaults.date} />
       <Card>
         <CardHeader>
           <CardTitle>Actividad del día</CardTitle>
           {defaults.existed && (
             <p className="text-sm text-muted-foreground">
-              Ya había datos de hoy: los estás editando (no se duplica).
+              Ya había datos de este día: los estás editando (no se duplica).
             </p>
           )}
         </CardHeader>
         <CardContent className="space-y-5">
+          <DateField
+            value={defaults.date}
+            isToday={defaults.isToday}
+            basePath="/josep"
+          />
           <div className="grid gap-5 sm:grid-cols-2">
             <NumberField
               name="callContacts"

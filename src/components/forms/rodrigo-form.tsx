@@ -3,6 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { saveRodrigoDailyState, type SaveState } from "@/lib/actions/daily";
 import { NumberField, ToggleField } from "@/components/forms/fields";
+import { DateField } from "@/components/forms/date-field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -13,6 +14,7 @@ import { Check } from "lucide-react";
 
 export interface RodrigoDefaults {
   date: string;
+  isToday: boolean;
   newProspects: number;
   prospectsIberoamerica: number;
   ambassadorsSigned: number;
@@ -65,17 +67,21 @@ export function RodrigoForm({ defaults }: { defaults: RodrigoDefaults }) {
 
   return (
     <form action={formAction}>
-      <input type="hidden" name="date" value={defaults.date} />
       <Card>
         <CardHeader>
           <CardTitle>Actividad del día</CardTitle>
           {defaults.existed && (
             <p className="text-sm text-muted-foreground">
-              Ya había datos de hoy: los estás editando (no se duplica).
+              Ya había datos de este día: los estás editando (no se duplica).
             </p>
           )}
         </CardHeader>
         <CardContent className="space-y-6">
+          <DateField
+            value={defaults.date}
+            isToday={defaults.isToday}
+            basePath="/rodrigo"
+          />
           {/* Ventas y captación */}
           <div className="space-y-3">
             <SectionLabel>Ventas y captación</SectionLabel>

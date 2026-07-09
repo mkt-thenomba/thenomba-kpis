@@ -55,21 +55,33 @@ const JOSEP_GLOSARIO: GlosarioItem[] = [
   },
 ];
 
-export default async function JosepPage() {
+export default async function JosepPage({
+  searchParams,
+}: {
+  searchParams: { date?: string };
+}) {
   await requireRole("ADMIN", "INBOUND");
 
   const today = dayStart(new Date());
   const todayISO = format(today, "yyyy-MM-dd");
 
+  // Día que se está registrando: el elegido (?date=) o hoy.
+  const selectedISO = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.date ?? "")
+    ? searchParams.date!
+    : todayISO;
+  const selectedDate = dayStart(new Date(selectedISO + "T00:00:00"));
+  const isToday = selectedISO === todayISO;
+
   const [existing, week, month, reminder] = await Promise.all([
-    prisma.josepDaily.findUnique({ where: { date: today } }),
-    getJosepWeek(today),
-    getJosepMonth(monthKey(today)),
+    prisma.josepDaily.findUnique({ where: { date: selectedDate } }),
+    getJosepWeek(selectedDate),
+    getJosepMonth(monthKey(selectedDate)),
     getLoadReminder(today),
   ]);
 
   const defaults: JosepDefaults = {
-    date: todayISO,
+    date: selectedISO,
+    isToday,
     callContacts: existing?.callContacts ?? 0,
     whatsappSlaMet: existing?.whatsappSlaMet ?? false,
     whatsappProactive: existing?.whatsappProactive ?? 0,
@@ -87,7 +99,7 @@ export default async function JosepPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Carga diaria · Josep</h1>
-        <p className="text-muted-foreground">{fechaLarga(today)}</p>
+        <p className="text-muted-foreground">{fechaLarga(selectedDate)}</p>
       </div>
 
       {reminder.josepPending && (
